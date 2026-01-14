@@ -1,0 +1,294 @@
+
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ankieta</title>
+  <style>
+    :root{
+      --bg:#0b1020; --card:rgba(255,255,255,.03); --text:#e9ecf5; --muted:#aab3d0;
+      --line:rgba(255,255,255,.12); --shadow: 0 20px 50px rgba(0,0,0,.45); --radius:16px;
+    }
+    body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:var(--bg);color:var(--text);padding:26px}
+    .wrap{max-width:980px;margin:0 auto}
+    .card{border:1px solid var(--line);border-radius:var(--radius);background:var(--card);padding:18px;box-shadow:var(--shadow)}
+    h1{margin:0 0 8px}
+    .muted{color:var(--muted);font-size:12px;line-height:1.5}
+    .pill{display:inline-flex;gap:8px;align-items:center;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--muted);font-size:12px}
+    .top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:10px}
+    .q{
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:rgba(0,0,0,.12);
+      padding:14px;
+      margin-top:12px;
+    }
+    .qtitle{font-weight:800;line-height:1.35;margin-bottom:10px}
+    .likert{display:flex;justify-content:space-between;gap:12px;margin-top:6px;align-items:center}
+    .likert label{flex:1;text-align:center;cursor:pointer;user-select:none}
+    .likert input{display:none}
+    .dot{
+      width:18px;height:18px;border-radius:50%;margin:0 auto 6px;
+      opacity:.55;border:2px solid transparent;
+    }
+    .l1{background:#ff4d6d}
+    .l2{background:#ff9f43}
+    .l3{background:#feca57}
+    .l4{background:#7bed9f}
+    .l5{background:#2ed573}
+    .likert input:checked + .dot{
+      opacity:1;border-color:#fff;
+      box-shadow:0 0 0 2px rgba(255,255,255,.25);
+    }
+    .scale-labels{display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-top:8px}
+    textarea{
+      width:100%;padding:10px;border-radius:12px;border:1px solid var(--line);
+      background:rgba(0,0,0,.2);color:var(--text);min-height:90px;resize:vertical
+    }
+    select{
+      width:100%;padding:10px;border-radius:12px;border:1px solid var(--line);
+      background:rgba(0,0,0,.2);color:var(--text)
+    }
+    button{
+      margin-top:16px;padding:12px 14px;border-radius:12px;border:0;
+      background:linear-gradient(135deg,#2ee59d,#00c2ff);
+      color:#06101a;font-weight:900;cursor:pointer
+    }
+    .err{color:#ff9aa9;margin-top:10px;display:none}
+    .ok{color:#7bed9f;margin-top:10px;display:none}
+    .divider{height:1px;background:rgba(255,255,255,.08);margin:16px 0}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+
+      <div class="top">
+        <div>
+          <h1>Ankieta</h1>
+          <div class="muted">
+            Odpowiedzi są anonimowe w sensie badawczym. Odpowiedz intuicyjnie — nie ma dobrych ani złych odpowiedzi.
+          </div>
+        </div>
+        <div class="pill">Grupa: <b style="color:var(--text)">{{ group }}</b></div>
+      </div>
+
+      <!-- ukryte metadata -->
+      <input type="hidden" id="pid" value="{{ pid }}">
+      <input type="hidden" id="group" value="{{ group }}">
+
+      <div id="questions"></div>
+
+      <div class="divider"></div>
+
+      <div class="q">
+        <div class="qtitle">Pytanie otwarte: Co najbardziej wpłynęło na Twoje wrażenie?</div>
+        <textarea id="openText" placeholder="Napisz krótko..."></textarea>
+      </div>
+
+      <button onclick="submitSurvey()">Zakończ</button>
+      <div class="err" id="errBox"></div>
+      <div class="ok" id="okBox">Dzięki! Odpowiedzi zapisane.</div>
+    </div>
+  </div>
+
+<script>
+  // ---- seed (stały dla uczestnika, ale różny między uczestnikami) ----
+  const pid = document.getElementById("pid").value || "";
+  const group = document.getElementById("group").value || "";
+  const seedStr = (pid + "|" + group);
+
+  function seededRNG(seed){
+    // prosty hash -> liczba
+    let h = 2166136261;
+    for(let i=0;i<seed.length;i++){
+      h ^= seed.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    // xorshift32
+    let x = h >>> 0;
+    return function(){
+      x ^= x << 13; x >>>= 0;
+      x ^= x >> 17; x >>>= 0;
+      x ^= x << 5;  x >>>= 0;
+      return (x >>> 0) / 4294967296;
+    }
+  }
+  const rnd = seededRNG(seedStr);
+
+  function shuffleInPlace(arr){
+    for(let i=arr.length-1;i>0;i--){
+      const j = Math.floor(rnd()*(i+1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+  }
+
+  // ---- pytania Likert 1–5 (ID niezmienne!) ----
+  const likertItems = [
+    { id:"q1", text:"Ufam, że to narzędzie działa w sposób przewidywalny i rzetelny." },
+    { id:"q2", text:"Ufam, że informacje generowane przez to narzędzie są wiarygodne." },
+    { id:"q3", text:"Mam poczucie, że to narzędzie jest przygotowane w profesjonalny sposób." },
+
+    { id:"q4", text:"Mam poczucie, że dane użytkownika byłyby odpowiednio chronione podczas korzystania z tego narzędzia." },
+    { id:"q5", text:"Ufam, że historia rozmowy byłaby przechowywana w bezpieczny sposób." },
+
+    { id:"q6", text:"Chciał(a)bym korzystać z takiego narzędzia jako wsparcia pomiędzy sesjami terapeutycznymi." },
+    { id:"q7", text:"Gdybym miał(a) możliwość, był(a)bym skłonny(a) korzystać z tego narzędzia ponownie." },
+
+    { id:"q8", text:"Uważam, że sposób wykorzystania sztucznej inteligencji w tym narzędziu jest akceptowalny etycznie." },
+    { id:"q9", text:"Czuł(a)bym się komfortowo, korzystając z takiego narzędzia w kontekście wsparcia psychologicznego." },
+
+    { id:"q10", text:"Zwykle wolę dokładnie przemyśleć informacje, zanim wyrobię sobie opinię." },
+  ];
+
+  // ---- manipulation check (zawsze na końcu) ----
+  const mcItems = [
+    { id:"mc1", text:"Czy podczas prezentacji widziałeś(-aś) element potwierdzający wiarygodność lub autentyczność rozmowy (np. certyfikat/potwierdzenie)?", options:["Tak","Nie","Nie pamiętam"] },
+    { id:"mc2", text:"Czy podczas prezentacji pojawiła się informacja o źródle lub autorze rozwiązania (np. instytucja, ekspert, organizacja)?", options:["Tak","Nie","Nie pamiętam"] },
+  ];
+
+  // ---- kontrolowana randomizacja: bloki stałe, shuffle tylko wewnątrz ----
+  const blocks = [
+    { ids:["q1","q2","q3"], shuffle:true },        // Zaufanie
+    { ids:["q4","q5"], shuffle:true },             // Bezpieczeństwo
+    { ids:["q8","q9"], shuffle:true },             // Etyczność/komfort
+    { ids:["q10"], shuffle:false },                // NFC (stałe)
+    { ids:["q6","q7"], shuffle:true },             // Intencja użycia - NA KOŃCU (przed MC)
+  ];
+
+  const idToLikert = Object.fromEntries(likertItems.map(x=>[x.id,x]));
+  let orderedLikert = [];
+  for(const b of blocks){
+    const ids = [...b.ids];
+    if(b.shuffle) shuffleInPlace(ids);
+    orderedLikert.push(...ids.map(id=>idToLikert[id]));
+  }
+
+  // kolejność do zapisu w CSV (żebyś wiedział jak UI ułożyło pytania)
+  const order = orderedLikert.map(x=>x.id).concat(mcItems.map(x=>x.id));
+  window.__ORDER = order;
+
+  function renderLikert(item){
+    const name = item.id;
+    return `
+      <div class="q" data-qid="${item.id}">
+        <div class="qtitle">${item.text}</div>
+        <div class="likert">
+          ${[1,2,3,4,5].map(v => `
+            <label>
+              <input type="radio" name="${name}" value="${v}">
+              <div class="dot l${v}"></div>
+              ${v}
+            </label>
+          `).join("")}
+        </div>
+        <div class="scale-labels">
+          <span>Zdecydowanie się nie zgadzam</span>
+          <span>Zdecydowanie się zgadzam</span>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderMC(item){
+    const name = item.id;
+    return `
+      <div class="q" data-qid="${item.id}">
+        <div class="qtitle">${item.text}</div>
+        <select name="${name}">
+          <option value="" selected disabled>Wybierz…</option>
+          ${item.options.map(o => `<option value="${o}">${o}</option>`).join("")}
+        </select>
+      </div>
+    `;
+  }
+
+  // render do DOM
+  const questionsDiv = document.getElementById("questions");
+  questionsDiv.innerHTML =
+    orderedLikert.map(renderLikert).join("") +
+    `<div class="muted" style="margin-top:12px">Na koniec krótkie pytania kontrolne:</div>` +
+    mcItems.map(renderMC).join("");
+
+  function showErr(msg){
+    const e = document.getElementById("errBox");
+    e.style.display = "block";
+    e.textContent = msg;
+  }
+  function clearErr(){
+    const e = document.getElementById("errBox");
+    e.style.display = "none";
+    e.textContent = "";
+  }
+
+  function collectAnswers(){
+    const answers = {};
+
+    // Likert
+    for(const it of likertItems){
+      const sel = document.querySelector(`input[name="${it.id}"]:checked`);
+      answers[it.id] = sel ? sel.value : "";
+    }
+
+    // MC
+    for(const it of mcItems){
+      const sel = document.querySelector(`select[name="${it.id}"]`);
+      answers[it.id] = sel ? sel.value : "";
+    }
+
+    return answers;
+  }
+
+  async function submitSurvey(){
+    clearErr();
+
+    const participant_id = pid;
+    const grp = group;
+    const answers = collectAnswers();
+    const open_text = (document.getElementById("openText").value || "").trim();
+
+    if(!participant_id || !grp){
+      showErr("Brak participant_id lub group (sprawdź /finish → /survey?pid=...&group=...)");
+      return;
+    }
+
+    // walidacja w UI (to samo i tak robisz w backendzie)
+    const required = ["q1","q2","q3","q4","q5","q6","q7","q8","q9","q10","mc1","mc2"];
+    for(const k of required){
+      if(!answers[k]){
+        showErr("Uzupełnij wszystkie pytania (brakuje: " + k + ").");
+        return;
+      }
+    }
+
+    const payload = {
+      ts: new Date().toISOString(),
+      participant_id,
+      group: grp,
+      answers,
+      order: window.__ORDER,
+      open_text
+    };
+
+    const res = await fetch("/api/survey", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(payload)
+    });
+
+window.location.href = `/debrief?pid=${encodeURIComponent(pid)}&group=${encodeURIComponent(grp)}`;
+
+const data = await res.json();
+    if(!res.ok || data.error){
+      showErr("Błąd zapisu: " + (data.error || res.status));
+      return;
+    }
+
+    document.getElementById("okBox").style.display = "block";
+    // możesz przekierować po 1–2 sek:
+    setTimeout(()=>{ window.location.href="/"; }, 800);
+  }
+</script>
+</body>
+</html>

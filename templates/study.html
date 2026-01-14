@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Badanie – symulacja rozmowy</title>
+  <style>
+    :root{
+      --bg:#0b1020; --text:#e9ecf5; --muted:#aab3d0;
+      --line:rgba(255,255,255,.10); --accent:#7c5cff; --good:#2ee59d;
+      --shadow: 0 20px 50px rgba(0,0,0,.45); --radius:16px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; color:var(--text);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+      background:
+        radial-gradient(1000px 700px at 10% -10%, rgba(124,92,255,.35), transparent 60%),
+        radial-gradient(900px 600px at 100% 0%, rgba(46,229,157,.20), transparent 55%),
+        linear-gradient(180deg, var(--bg), #070a14 70%);
+      padding: 22px 14px 60px;
+    }
+    .container{max-width:1100px;margin:0 auto}
+    header{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px}
+    h1{margin:0;font-size:22px}
+    .subtitle{color:var(--muted);margin-top:6px;max-width:820px;line-height:1.45;font-size:13px}
+    .pill{display:inline-flex;gap:8px;align-items:center;padding:8px 12px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--muted);font-size:12px}
+
+    .card{border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);background:rgba(255,255,255,.03);overflow:hidden}
+    .hd{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;background:rgba(0,0,0,.12)}
+    .hd h2{margin:0;font-size:14px}
+    .bd{padding:14px}
+
+    .chat{display:flex;flex-direction:column;gap:10px;max-height:62vh;overflow:auto;padding-right:6px}
+    @media (max-height: 800px){ .chat{max-height:58vh} }
+
+    .bubble{padding:10px 12px;border:1px solid var(--line);border-radius:14px;max-width:92%}
+    .u{align-self:flex-end;background:rgba(124,92,255,.12)}
+    .a{align-self:flex-start;background:rgba(46,229,157,.08)}
+    .meta{font-size:11px;color:var(--muted);margin-top:4px}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    button{border:0;border-radius:12px;padding:10px 12px;cursor:pointer;font-weight:700}
+    .btn{background:linear-gradient(135deg, var(--accent), #a18bff);color:#fff}
+    .btn2{background:rgba(255,255,255,.06);border:1px solid var(--line);color:var(--text);font-weight:600}
+    .btnGood{background:linear-gradient(135deg, var(--good), #00c2ff);color:#06101a}
+    .status{margin-top:12px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:rgba(0,0,0,.12);color:var(--muted);display:none}
+
+    .authority{
+      display:flex;gap:12px;align-items:flex-start;
+      padding:12px;border:1px solid var(--line);border-radius:14px;
+      background:rgba(255,255,255,.03); margin-bottom:12px;
+    }
+    .authority img{width:64px;height:64px;border-radius:12px;object-fit:cover;border:1px solid var(--line)}
+    .authority .name{font-weight:800}
+    .authority .small{font-size:12px;color:var(--muted);line-height:1.35}
+
+    .certBox{display:none}
+    .tag{
+      display:inline-flex;align-items:center;gap:8px;
+      padding:6px 10px;border-radius:999px;border:1px solid var(--line);
+      background:rgba(0,0,0,.18); color:var(--muted); font-size:12px;
+      margin-top:8px
+    }
+    .kv{padding:10px;border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.12);margin-top:10px}
+    .k{color:var(--muted);font-size:11px;margin-bottom:6px}
+    .v{font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;font-size:12px;word-break:break-all}
+    a{color:#b9c3ff}
+
+    /* ✅ ikona CERT zawsze widoczna i czytelna */
+    .iconWrap{
+      width:64px;height:64px;border-radius:12px;
+      border:1px solid var(--line);
+      background:rgba(255,255,255,.06);
+      display:flex;align-items:center;justify-content:center;
+      flex:0 0 auto;
+      color:rgba(233,236,245,.95);
+      box-shadow: 0 10px 20px rgba(0,0,0,.25);
+    }
+    .iconWrap svg{width:34px;height:34px}
+
+    .certIcon{
+  width:72px;
+  height:72px;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: radial-gradient(circle at top left,
+    rgba(124,92,255,.25),
+    rgba(0,0,0,.2)
+  );
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:
+    0 0 30px rgba(124,92,255,.25),
+    0 10px 25px rgba(0,0,0,.45);
+  flex:0 0 auto;
+  transition:.3s ease;
+}
+
+.certIcon svg{
+  width:52px;
+  height:52px;
+}
+
+.certIcon:hover{
+  transform: translateY(-2px) scale(1.05);
+  box-shadow:
+    0 0 45px rgba(124,92,255,.45),
+    0 12px 30px rgba(0,0,0,.6);
+}
+
+
+    /* ✅ opis standardów pod certyfikatem */
+    .certNote{
+      margin-top:12px;
+      border:1px dashed rgba(255,255,255,.14);
+      border-radius:14px;
+      padding:12px;
+      background:rgba(0,0,0,.10);
+      color:var(--muted);
+      font-size:12px;
+      line-height:1.5;
+    }
+    .certNote b{color:var(--text)}
+    .certNote ul{margin:8px 0 0 18px;padding:0}
+    .certNote li{margin:6px 0}
+
+    /* ✅ modal */
+    .modalBackdrop{
+      display:none; position:fixed; inset:0;
+      background:rgba(0,0,0,.55);
+      align-items:center; justify-content:center;
+      padding:18px;
+      z-index:9999;
+    }
+    .modal{
+      width:min(820px, 100%);
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:rgba(18,26,51,.96);
+      box-shadow:var(--shadow);
+      overflow:hidden;
+    }
+    .modalHd{
+      padding:12px 14px;border-bottom:1px solid var(--line);
+      display:flex;justify-content:space-between;align-items:center;background:rgba(0,0,0,.18)
+    }
+    .modalHd h3{margin:0;font-size:14px}
+    .modalBd{padding:14px}
+  </style>
+</head>
+
+<body>
+<div class="container">
+  <header>
+    <div>
+      <h1>Badanie: symulacja rozmowy terapeutycznej</h1>
+      <div class="subtitle">
+        Rozmowa jest symulowana (krokowa). W zależności od wersji interfejsu mogą pojawić się dodatkowe elementy (np. certyfikacja).
+      </div>
+    </div>
+    <div class="pill">Grupa: <b style="color:var(--text);margin-left:6px">{{ group }}</b></div>
+  </header>
+
+  <section class="card">
+    <div class="hd">
+      <h2>Rozmowa</h2>
+      <div class="pill" id="stepPill">Krok 1/12</div>
+    </div>
+    <div class="bd">
+
+      <!-- AUTH -->
+      <div id="authorityBox" style="display:none">
+        <div class="authority">
+          <img src="/static/authority.png" alt="zdjęcie prof. dr hab. Aleksander Jastrzębski" />
+          <div>
+            <div class="name">prof. dr hab. Aleksander Jastrzębski</div>
+            <div class="small">
+              Przewodniczący stowarzyszenia psychologów na rzecz rozwoju terapii CBT<br>
+              „Rekomenduję to narzędzie jako bezpieczne wsparcie rozmów między sesjami. Ułatwia kontrolę integralności zapisu.”
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CERT -->
+      <div id="certBox" class="certBox">
+        <div class="authority">
+          <!-- Ikona wbudowana -->
+          <div class="certIcon" title="Certyfikacja rozmowy">
+  <svg viewBox="0 0 64 64" fill="none">
+    <defs>
+      <linearGradient id="certGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#7c5cff"/>
+        <stop offset="100%" stop-color="#2ee59d"/>
+      </linearGradient>
+      <filter id="glow">
+        <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+        <feMerge>
+          <feMergeNode in="coloredBlur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+
+    <!-- Badge -->
+    <rect x="6" y="6" width="52" height="52" rx="14"
+          fill="url(#certGrad)" opacity="0.15"/>
+
+    <rect x="10" y="10" width="44" height="44" rx="12"
+          stroke="url(#certGrad)" stroke-width="2"/>
+
+    <!-- Shield -->
+    <path d="M32 16L46 22V32C46 42 39 48 32 50C25 48 18 42 18 32V22L32 16Z"
+          stroke="url(#certGrad)"
+          stroke-width="2.5"
+          filter="url(#glow)"/>
+
+    <!-- Check -->
+    <path d="M25 33L30 38L40 27"
+          stroke="url(#certGrad)"
+          stroke-width="3"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          filter="url(#glow)"/>
+  </svg>
+</div>
+
+          <div style="width:100%">
+            <div class="name">Certyfikacja rozmowy</div>
+            <div class="small">
+              Ten moduł pozwala potwierdzić integralność zapisu rozmowy (hash + zaszyfrowany zapis).
+              <div class="tag" id="certStateTag">🛡 Nie wygenerowano</div>
+            </div>
+
+            <!-- ✅ Podgląd certyfikatu: najpierw TEMPLATE, potem REAL -->
+           <div id="certPreviewBox" style="display:none;">
+              <div class="certPreviewFrame">
+                <img id="certPreviewImg" class="certPreviewImg" src="" alt="Podgląd certyfikatu" />
+              </div>
+              <div class="meta" id="certPreviewMeta" style="margin-top:6px"></div>
+            </div>
+
+            <div class="kv" id="certData" style="display:none">
+              <div class="k">Hash</div>
+              <div class="v" id="certHash"></div>
+
+              <div class="k" style="margin-top:10px">CID certyfikatu</div>
+              <div class="v" id="certCid"></div>
+
+              <div class="k" style="margin-top:10px">Link weryfikacji</div>
+              <div class="v"><a id="certVerify" target="_blank" rel="noopener">Otwórz</a></div>
+
+              <div class="row" style="margin-top:12px">
+                <button class="btnGood" id="downloadBtn" onclick="downloadCert()" style="display:none">Pobierz certyfikat (PNG)</button>
+                <button class="btn2" onclick="generateNow()">Wygeneruj ponownie</button>
+              </div>
+            </div>
+
+            <div class="row" style="margin-top:12px" id="certActionsRow">
+              <button class="btn2" onclick="generateNow()">Wygeneruj certyfikat</button>
+            </div>
+
+            <div class="certNote">
+              <b>Bezpieczeństwo i standardy:</b>
+              <ul>
+                <li>Wygenerowane i zbierane dane są <b>szyfrowane</b>, a zapis rozmowy jest powiązany z <b>graficznym certyfikatem</b> w celu kontroli integralności.</li>
+                <li>Dostęp do odtworzenia treści rozmowy ma wyłącznie <b>pacjent</b> i <b>terapeuta</b> za pomocą certyfikatu graficznego (w ramach trwającego procesu terapii).</li>
+                <li>Aby narzędzie mogło otrzymać certyfikat, musi spełniać wymagania dot. <b>bezpieczeństwa danych</b> i <b>etyki</b>, być trenowane na <b>wiarygodnych źródłach naukowych</b> oraz <b>testowane przez ekspertów</b> (cyfrowych i psychologicznych).</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="chat" id="chatBox"></div>
+
+      <div class="row">
+        <button class="btn2" onclick="restart()">Od początku</button>
+        <button class="btn" id="nextBtn" onclick="nextStep()">Dalej</button>
+      </div>
+
+      <div class="status" id="statusBox"></div>
+    </div>
+  </section>
+</div>
+
+<!-- MODAL: podsumowanie sesji -->
+<div class="modalBackdrop" id="summaryModal">
+  <div class="modal">
+    <div class="modalHd">
+      <h3>Podsumowanie sesji</h3>
+      <button class="btn2" onclick="closeSummary()">Zamknij</button>
+    </div>
+    <div class="modalBd">
+      <div class="small" style="color:var(--muted);line-height:1.5">
+        Rozmowa zakończona. Możesz przejść do ankiety.
+      </div>
+
+      <div class="kv" style="margin-top:12px">
+        <div class="k">Status</div>
+        <div class="v">Zakończono</div>
+      </div>
+
+      <div class="kv" id="summaryCertBlock" style="display:none">
+        <div class="k">Certyfikat (hash)</div>
+        <div class="v" id="summaryHash"></div>
+        <div class="k" style="margin-top:10px">Weryfikacja</div>
+        <div class="v"><a id="summaryVerify" target="_blank" rel="noopener">Otwórz</a></div>
+      </div>
+
+      <div class="row" style="margin-top:14px">
+        <button class="btnGood" onclick="goSurvey()">Przejdź do ankiety →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const GROUP = "{{ group }}";
+
+  const steps = [
+      {
+    "role": "assistant",
+    "content": "Dobry wieczór. Jestem tutaj, aby pomóc Ci uporządkować to, co teraz przeżywasz. Zanim przejdziemy dalej, spróbuj ocenić poziom swojego obecnego napięcia na skali od 0 do 10."
+  },
+  {
+    "role": "user",
+    "content": "Nie mogę zasnąć, czuję że sytuacje z całego dnia spadły na mnie z momentem wejścia do łóżka"
+  },
+  {
+    "role": "assistant",
+    "content": "To zjawisko często pojawia się, gdy po całym dniu bodźców nagle zapada cisza. Wspomniałeś, że te sytuacje na Ciebie 'spadły' – co dokładnie czujesz teraz w swoim ciele, gdy o nich myślisz?"
+  },
+  {
+    "role": "user",
+    "content": "Leżę i myślę o pracy i kłótni z żoną. Czuję silny ścisk w żołądku i napięcie w ramionach. Chcę po prostu zasnąć."
+  },
+  {
+    "role": "assistant",
+    "content": "Zauważmy ten mechanizm: Twoje ciało reaguje na te myśli sygnałem alarmowym (ściskiem w żołądku), co biologicznie uniemożliwia sen. Gdybyśmy mieli nazwać jedną, najbardziej 'gorącą' myśl, która teraz krąży Ci po głowie, jak by ona brzmiała?"
+  },
+  {
+    "role": "user",
+    "content": "Że jutro nie zdążę ze wszystkim i zawiodę innych."
+  },
+  {
+    "role": "assistant",
+    "content": "To brzmi jak przewidywanie przyszłości, które wywołuje duży lęk. Zastosujmy 'technikę podwójnych standardów': gdyby Twój najlepszy przyjaciel był w Twojej sytuacji i bał się, że zawiedzie zespół, co byś mu powiedział, patrząc na fakty?"
+  },
+  {
+    "role": "user",
+    "content": "Pewnie powiedziałbym mu, że zawsze jakoś dawał radę i że jedna noc nic nie zmieni. Ale u mnie to wydaje się realne."
+  },
+  {
+    "role": "assistant",
+    "content": "To cenne spostrzeżenie – potrafisz być bardziej wyrozumiały dla innych niż dla siebie. Aby wyciszyć układ nerwowy, zamiast planować zadania w łóżku (co pobudza mózg), zastosujemy technikę 'odroczenia martwienia'. Umów się ze sobą na 15 minut planowania jutro o 9:00 rano, a teraz skupimy się na rozluźnieniu żołądka poprzez oddech pudełkowy. Chcesz spróbować?"
+  },
+  {
+    "role": "user",
+    "content": "Tak, spróbujmy. To odroczenie brzmi rozsądnie, bo teraz i tak nic nie zrobię."
+  }
+  ];
+
+  let i = 0;
+  let transcript = [];
+  let certified = null;
+
+  const chatBox = document.getElementById("chatBox");
+  const stepPill = document.getElementById("stepPill");
+  const statusBox = document.getElementById("statusBox");
+  const nextBtn = document.getElementById("nextBtn");
+
+  // Guard: bez zgody nie wpuszczamy do badania
+if (sessionStorage.getItem("study_consent") !== "yes") {
+  window.location.href = "/";
+}
+
+  function setStatus(msg){
+    statusBox.style.display = "block";
+    statusBox.textContent = msg;
+  }
+
+  function addBubble(role, text){
+    const div = document.createElement("div");
+    div.className = "bubble " + (role === "user" ? "u" : "a");
+    div.innerHTML = `<div>${text}</div><div class="meta">${role === "user" ? "Użytkownik" : "Asystent"}</div>`;
+    chatBox.appendChild(div);
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  function setStepPill(){
+    stepPill.textContent = `Krok ${Math.min(i, steps.length)}/${steps.length}`;
+  }
+
+  function openSummary(){
+    document.getElementById("summaryModal").style.display = "flex";
+  }
+
+  function closeSummary(){
+    document.getElementById("summaryModal").style.display = "none";
+    setStatus("Rozmowa zakończona — możesz przejść do ankiety w dowolnym momencie.");
+  }
+
+  /* ✅ Podgląd: template przed generacją + real po generacji
+     Wymaga backendu:
+       GET /preview?mode=template  -> template PNG
+       GET /preview               -> real PNG
+     (dodasz to w Flasku, jeśli jeszcze nie masz)
+  */
+  function showTemplatePreview(){
+    const box = document.getElementById("certPreviewBox");
+    const img = document.getElementById("certPreviewImg");
+
+    img.src = `/preview?mode=template&ts=${Date.now()}`;
+    box.style.display = "block";
+  }
+
+
+  function showRealPreview(){
+  const box = document.getElementById("certPreviewBox");
+  const img = document.getElementById("certPreviewImg");
+  const meta = document.getElementById("certPreviewMeta");
+
+  img.src = `/preview?ts=${Date.now()}`;
+  if(meta) meta.textContent = "Podgląd certyfikatu (PNG) — wygenerowany dla tej rozmowy.";
+  box.style.display = "block";
+}
+
+  function restart(){
+    i = 0;
+    transcript = [];
+    certified = null;
+
+    setStatus("Rozpoczęto od nowa.");
+    chatBox.innerHTML = "";
+    setStepPill();
+
+    nextBtn.style.display = "inline-flex";
+    nextBtn.disabled = false;
+    nextBtn.textContent = "Dalej";
+
+    if(GROUP === "CERT"){
+      document.getElementById("certStateTag").textContent = "🛡 Nie wygenerowano";
+      document.getElementById("certData").style.display = "none";
+      document.getElementById("downloadBtn").style.display = "none";
+      document.getElementById("certActionsRow").style.display = "flex";
+      document.getElementById("summaryCertBlock").style.display = "none";
+
+      // ✅ pokaż szablon od razu po restarcie
+      showTemplatePreview();
+    }
+
+    document.getElementById("summaryModal").style.display = "none";
+
+    nextStep();
+  }
+
+  function openCertPreview(){
+  const img = document.getElementById("certPreviewImg");
+  if(!img || !img.src) return;
+  window.open(img.src, "_blank", "noopener");
+}
+
+  async function nextStep(){
+    if(i >= steps.length) return;
+
+    const step = steps[i];
+    transcript.push(step);
+    addBubble(step.role, step.content);
+
+    i++;
+    setStepPill();
+
+    if(i === steps.length){
+      nextBtn.style.display = "none";
+
+      if(GROUP === "CERT"){
+        await certifyEnd();
+      }
+
+      openSummary();
+    }
+  }
+
+  async function certifyEnd(){
+    setStatus("Generowanie certyfikatu…");
+    document.getElementById("certStateTag").textContent = "🛡 Generowanie…";
+
+    const res = await fetch("/api/certify", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ messages: transcript, chatbot:"Study Demo", conversation_id:"study-session" })
+    });
+    const data = await res.json();
+
+    if(data.error){
+      setStatus("Błąd certyfikacji: " + data.error);
+      document.getElementById("certStateTag").textContent = "🛡 Błąd";
+      return;
+    }
+
+    certified = data;
+    setStatus("Certyfikat wygenerowany.");
+
+    document.getElementById("certStateTag").textContent = "🛡 Wygenerowano ✅";
+    document.getElementById("certData").style.display = "block";
+    document.getElementById("certActionsRow").style.display = "none";
+
+    document.getElementById("certHash").textContent = data.hash;
+    document.getElementById("certCid").textContent = data.cert_cid;
+
+    const v = document.getElementById("certVerify");
+    v.href = data.verify_url;
+    v.textContent = data.verify_url;
+
+    if(data.download_url){
+      document.getElementById("downloadBtn").style.display = "inline-flex";
+    }
+
+    document.getElementById("summaryCertBlock").style.display = "block";
+    document.getElementById("summaryHash").textContent = data.hash;
+    const sv = document.getElementById("summaryVerify");
+    sv.href = data.verify_url;
+    sv.textContent = data.verify_url;
+
+    // ✅ po certyfikacji podmień preview na prawdziwy PNG
+    showRealPreview();
+  }
+
+  async function generateNow(){
+    if(GROUP !== "CERT") return;
+    if(transcript.length === 0){
+      setStatus("Najpierw przejdź co najmniej 1 krok rozmowy.");
+      return;
+    }
+    await certifyEnd();
+  }
+
+  function goSurvey(){
+    window.location.href = "/finish";
+  }
+
+  function downloadCert(){
+    if(!certified || !certified.cert_cid) return;
+    window.location.href = `/download/cert/${encodeURIComponent(certified.cert_cid)}`;
+  }
+
+  if(GROUP === "AUTH"){
+    document.getElementById("authorityBox").style.display = "block";
+  }
+  if(GROUP === "CERT"){
+    document.getElementById("certBox").style.display = "block";
+    // ✅ template pokaże się w restart()
+  }
+
+  restart();
+</script>
+
+</body>
+</html>

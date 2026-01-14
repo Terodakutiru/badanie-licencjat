@@ -1,0 +1,372 @@
+
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Certyfikat rozmowy</title>
+  <style>
+  :root{
+    --bg:#0b1020;
+    --card:#121a33;
+    --card2:#0f1630;
+    --text:#e9ecf5;
+    --muted:#aab3d0;
+    --line:rgba(255,255,255,.10);
+    --accent:#7c5cff;
+    --accent2:#2ee59d;
+    --danger:#ff4d6d;
+    --warn:#ffcc00;
+    --shadow: 0 20px 50px rgba(0,0,0,.45);
+    --radius:16px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial;
+    background:
+      radial-gradient(1000px 700px at 10% -10%, rgba(124,92,255,.35), transparent 60%),
+      radial-gradient(900px 600px at 100% 0%, rgba(46,229,157,.20), transparent 55%),
+      linear-gradient(180deg, var(--bg), #070a14 70%);
+    color: var(--text);
+    padding: 28px 16px 60px;
+  }
+  .container{max-width:1100px;margin:0 auto}
+  header{
+    display:flex;align-items:flex-start;justify-content:space-between;gap:16px;
+    margin-bottom:18px;
+  }
+  h1{font-size:28px;margin:0}
+  .subtitle{color:var(--muted);margin-top:6px;max-width:680px;line-height:1.45}
+  .pill{
+    display:inline-flex;align-items:center;gap:8px;
+    padding:8px 12px;border:1px solid var(--line);border-radius:999px;
+    background:rgba(255,255,255,.03);color:var(--muted);font-size:13px;
+  }
+  .grid{
+    display:grid;
+    grid-template-columns: 1.2fr .8fr;
+    gap:16px;
+  }
+  @media (max-width: 900px){
+    .grid{grid-template-columns:1fr}
+  }
+  .card{
+    background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+    border:1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow:hidden;
+  }
+  .card .hd{
+    padding:14px 16px;
+    border-bottom:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    background:rgba(0,0,0,.12);
+  }
+  .card .hd h2{font-size:16px;margin:0}
+  .card .bd{padding:16px}
+  label{display:block;color:var(--muted);font-size:13px;margin-bottom:8px}
+  textarea, input{
+    width:100%;
+    border:1px solid var(--line);
+    background:rgba(0,0,0,.18);
+    color:var(--text);
+    border-radius:12px;
+    padding:12px 12px;
+    font-size:14px;
+    outline:none;
+  }
+  textarea{min-height:120px;resize:vertical}
+  textarea:focus, input:focus{border-color: rgba(124,92,255,.55); box-shadow: 0 0 0 3px rgba(124,92,255,.18)}
+  .row{display:flex;gap:10px;flex-wrap:wrap}
+  .btn{
+    appearance:none;border:0;
+    background: linear-gradient(135deg, var(--accent), #a18bff);
+    color:#fff;
+    padding:11px 14px;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:700;
+    display:inline-flex;align-items:center;gap:8px;
+  }
+  .btn:disabled{opacity:.55;cursor:not-allowed}
+  .btn.secondary{
+    background: rgba(255,255,255,.06);
+    border:1px solid var(--line);
+    color: var(--text);
+    font-weight:600;
+  }
+  .btn.good{
+    background: linear-gradient(135deg, var(--accent2), #00c2ff);
+  }
+  .btn.danger{
+    background: linear-gradient(135deg, var(--danger), #ff9db0);
+  }
+  .kpi{
+    display:grid;grid-template-columns:1fr;gap:10px;margin-top:12px
+  }
+  .kv{
+    padding:12px;border:1px solid var(--line);border-radius:12px;background:rgba(0,0,0,.12)
+  }
+  .kv .k{color:var(--muted);font-size:12px;margin-bottom:6px}
+  .kv .v{font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size:12.5px; word-break:break-all}
+  .status{
+    display:flex;align-items:center;gap:10px;
+    padding:10px 12px;border-radius:12px;border:1px solid var(--line);
+    background:rgba(0,0,0,.12); color: var(--muted);
+    margin-top:12px;
+  }
+  .dot{width:10px;height:10px;border-radius:999px;background:rgba(255,255,255,.25)}
+  .dot.ok{background:var(--accent2)}
+  .dot.err{background:var(--danger)}
+  .dot.warn{background:var(--warn)}
+  .preview{
+    margin-top:12px;
+    border-radius:14px;
+    border:1px solid var(--line);
+    background: rgba(0,0,0,.12);
+    padding: 10px;
+  }
+  .preview img{width:100%;border-radius:10px;display:block}
+  .small{font-size:12px;color:var(--muted);line-height:1.45}
+  .copy{
+    font-size:12px;
+    padding:8px 10px;
+    border-radius:10px;
+  }
+  .hr{height:1px;background:var(--line);margin:14px 0}
+</style>
+</head>
+<body>
+  <div class="container">
+  <header>
+    <div>
+      <h1>Symulacja rozmowy z chatbotem</h1>
+      <div class="subtitle">
+        Demo certyfikacji rozmowy: generowanie hasha, szyfrowanie, upload IPFS oraz weryfikacja (odszyfrowanie).
+      </div>
+    </div>
+    <div class="pill">🔒 Tryb: <span id="modeLabel">online/offline</span></div>
+  </header>
+
+  <div class="grid">
+    <!-- LEWA: GENEROWANIE -->
+    <section class="card">
+      <div class="hd">
+        <h2>1) Wprowadź rozmowę</h2>
+        <button class="btn secondary copy" onclick="fillExample()">Wstaw przykład</button>
+      </div>
+      <div class="bd">
+        <label for="chatInput">Treść rozmowy</label>
+        <textarea id="chatInput" placeholder="Wpisz rozmowę..."></textarea>
+
+        <div class="row">
+          <button id="btnGenerate" class="btn" onclick="sendConversation()">🔐 Generuj certyfikat</button>
+          <button class="btn secondary" onclick="clearAll()">Wyczyść</button>
+        </div>
+
+        <div id="statusBox" class="status" style="display:none;">
+          <div id="statusDot" class="dot"></div>
+          <div id="statusText">Status…</div>
+        </div>
+
+        <div class="kpi" id="resultKpi" style="display:none;">
+          <div class="kv">
+            <div class="k">Hash SHA-256</div>
+            <div class="v" id="hashOut"></div>
+          </div>
+          <div class="kv">
+            <div class="k">CID certyfikatu</div>
+            <div class="v" id="certCidOut"></div>
+            <div class="row" style="margin-top:8px">
+              <button class="btn secondary copy" onclick="copyText('certCidOut')">Kopiuj</button>
+              <a id="certLink" class="btn secondary" target="_blank" rel="noopener">Otwórz IPFS</a>
+            </div>
+          </div>
+          <div class="kv">
+            <div class="k">CID rozmowy</div>
+            <div class="v" id="textCidOut"></div>
+            <div class="row" style="margin-top:8px">
+              <button class="btn secondary copy" onclick="copyText('textCidOut')">Kopiuj</button>
+              <a id="textLink" class="btn secondary" target="_blank" rel="noopener">Otwórz IPFS</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="preview" id="previewBox" style="display:none;">
+          <img src="/preview" alt="Certyfikat" id="certPreview">
+          <div class="small" style="margin-top:8px;">
+            Podgląd generowanego certyfikatu (PNG).
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- PRAWA: WERYFIKACJA -->
+    <section class="card">
+      <div class="hd">
+        <h2>2) Weryfikacja (odszyfrowanie)</h2>
+        <div class="pill">🧪 Badanie: grupa CERT</div>
+      </div>
+      <div class="bd">
+        <label for="cidCert">CID certyfikatu (encrypted)</label>
+        <input type="text" id="cidCert" placeholder="Wklej CID certyfikatu...">
+        <div class="row">
+          <button class="btn good" onclick="decryptCert()">🔓 Odszyfruj certyfikat</button>
+        </div>
+
+        <div class="hr"></div>
+
+        <label for="cidText">CID rozmowy (encrypted)</label>
+        <input type="text" id="cidText" placeholder="Wklej CID rozmowy...">
+        <div class="row">
+          <button class="btn good" onclick="decryptText()">🔓 Odszyfruj rozmowę</button>
+        </div>
+
+        <div id="decryptResult" class="output" style="white-space: pre-wrap; margin-top: 14px; display:none;"></div>
+      </div>
+    </section>
+  </div>
+</div>
+
+  <script>
+  function setStatus(type, msg){
+    const box = document.getElementById("statusBox");
+    const dot = document.getElementById("statusDot");
+    const text = document.getElementById("statusText");
+    box.style.display = "flex";
+    dot.className = "dot" + (type ? (" " + type) : "");
+    text.textContent = msg;
+  }
+
+  function copyText(elId){
+    const t = document.getElementById(elId)?.textContent || "";
+    if(!t) return;
+    navigator.clipboard.writeText(t);
+    setStatus("ok", "Skopiowano do schowka ✅");
+  }
+
+  function fillExample(){
+    document.getElementById("chatInput").value =
+`Użytkownik: Mam problem z zaufaniem do chatbotów.
+AI: Rozumiem. Opowiedz proszę, co budzi Twój niepokój?
+Użytkownik: Skąd wiem, że ta rozmowa nie została zmieniona?
+AI: Możemy wygenerować certyfikat z hashem i szyfrowaniem, żeby ułatwić weryfikację.`;
+  }
+
+  function clearAll(){
+    document.getElementById("chatInput").value = "";
+    document.getElementById("cidCert").value = "";
+    document.getElementById("cidText").value = "";
+    document.getElementById("resultKpi").style.display = "none";
+    document.getElementById("previewBox").style.display = "none";
+    document.getElementById("decryptResult").style.display = "none";
+    setStatus("", "Wyczyszczono.");
+  }
+
+  async function sendConversation() {
+    const btn = document.getElementById("btnGenerate");
+    const chat = document.getElementById('chatInput').value;
+
+    if (!chat.trim()) {
+      alert("Wprowadź treść rozmowy.");
+      return;
+    }
+
+    btn.disabled = true;
+    setStatus("warn", "Generowanie certyfikatu, szyfrowanie i upload…");
+
+    const response = await fetch("/generate", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ chat })
+    });
+
+    const result = await response.json();
+    btn.disabled = false;
+
+    if (result.error) {
+      setStatus("err", "Błąd: " + result.error);
+      return;
+    }
+
+    // KPI
+    document.getElementById("resultKpi").style.display = "grid";
+    document.getElementById("hashOut").textContent = result.hash || "";
+
+    document.getElementById("certCidOut").textContent = result.cert_cid || "";
+    document.getElementById("textCidOut").textContent = result.text_cid || "";
+
+    // linki
+    const certLink = document.getElementById("certLink");
+    certLink.href = result.ipfs_url_cert || "#";
+
+    const textLink = document.getElementById("textLink");
+    textLink.href = result.ipfs_url_text || "#";
+
+    // auto-wklej do pól odszyfrowania
+    document.getElementById("cidCert").value = result.cert_cid || "";
+    document.getElementById("cidText").value = result.text_cid || "";
+
+    // podgląd (odśwież cache bust)
+    document.getElementById("previewBox").style.display = "block";
+    document.getElementById("certPreview").src = "/preview?ts=" + Date.now();
+
+    setStatus("ok", "Gotowe ✅ Możesz teraz odszyfrować certyfikat lub rozmowę.");
+  }
+
+  async function decryptCert() {
+    const cid = document.getElementById('cidCert').value.trim();
+    if(!cid){ setStatus("err","Wklej CID certyfikatu."); return; }
+
+    setStatus("warn","Odszyfrowuję certyfikat…");
+    const res = await fetch("/decrypt", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ cid, type: "cert" })
+    });
+
+    if(!res.ok){
+      const t = await res.text();
+      setStatus("err","Błąd odszyfrowania: " + t);
+      return;
+    }
+
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const out = document.getElementById("decryptResult");
+    out.style.display = "block";
+    out.innerHTML = `<img src="${url}" style="max-width:100%;border-radius:12px;border:1px solid rgba(255,255,255,.12);">`;
+    setStatus("ok","Certyfikat odszyfrowany ✅");
+  }
+
+  async function decryptText() {
+    const cid = document.getElementById('cidText').value.trim();
+    if(!cid){ setStatus("err","Wklej CID rozmowy."); return; }
+
+    setStatus("warn","Odszyfrowuję rozmowę…");
+    const res = await fetch("/decrypt", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ cid, type: "text" })
+    });
+
+    const data = await res.json();
+    if(data.error){
+      setStatus("err","Błąd odszyfrowania: " + data.error);
+      return;
+    }
+
+    const out = document.getElementById("decryptResult");
+    out.style.display = "block";
+    out.textContent = data.text || "";
+    setStatus("ok","Rozmowa odszyfrowana ✅");
+  }
+
+  // label trybu (heurystyka po CID)
+  document.getElementById("modeLabel").textContent = "auto";
+</script>
+</body>
+</html>

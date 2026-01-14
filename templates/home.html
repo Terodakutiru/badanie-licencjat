@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Badanie – start</title>
+  <style>
+    body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:#0b1020;color:#e9ecf5;padding:26px}
+    .wrap{max-width:900px;margin:0 auto}
+    .card{border:1px solid rgba(255,255,255,.12);border-radius:16px;background:rgba(255,255,255,.03);padding:18px}
+    h1{margin:0 0 8px}
+    p{color:#aab3d0;line-height:1.6}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;align-items:center}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;gap:8px;
+      margin-top:10px;padding:12px 14px;border-radius:12px;
+      background:linear-gradient(135deg,#7c5cff,#a18bff);
+      color:#fff;text-decoration:none;font-weight:800;border:0;cursor:pointer
+    }
+    .btn[disabled]{opacity:.45;cursor:not-allowed}
+    .btn2{
+      display:inline-block;margin-top:10px;padding:12px 14px;border-radius:12px;
+      background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);
+      color:#e9ecf5;text-decoration:none;font-weight:700
+    }
+    .small{font-size:12px;color:#aab3d0;margin-top:10px}
+    .consent{
+      margin-top:16px;
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:14px;
+      padding:14px;
+      background:rgba(0,0,0,.18);
+    }
+    .consent h2{margin:0 0 8px;font-size:14px}
+    .consent ul{margin:8px 0 0 18px;color:#aab3d0;line-height:1.55}
+    label{display:flex;gap:10px;align-items:flex-start;color:#e9ecf5}
+    input[type="checkbox"]{width:18px;height:18px;margin-top:2px}
+    .warn{display:none;margin-top:10px;color:#ffb4b4;font-size:12px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Badanie: rozmowa z chatbotem</h1>
+      <p>
+        To krótkie 15 minutowe badanie dotyczy odbioru interfejsu rozmowy. Prezentowana treść jest zapisem rozmowy użytkownika z terapeutycznym AI asystentem.
+        <br>Na końcu pojawi się ankieta: 12 pytań zamkniętych oraz jedno pytanie otwarte.
+        <br>W razie wątpliwości, wszelkie pytania prosimy kierować na adres mailowy: jstanczyk2@st.swps.edu.pl
+      </p>
+
+      <div class="consent">
+        <h2>Zgoda na udział w badaniu</h2>
+        <p style="margin:0;color:#aab3d0;line-height:1.6;font-size:13px">
+          Udział jest dobrowolny. Możesz przerwać w dowolnym momencie. Dane z badania są anonimowe i będą używane wyłącznie
+          do celów badawczych w ramach pracy dyplomowej.
+        </p>
+
+        <ul>
+          <li>Zapoznałem/am się z informacją o badaniu i rozumiem jego cel.</li>
+          <li>Wyrażam dobrowolną zgodę na udział i mogę wycofać zgodę w dowolnym momencie.</li>
+          <li>Oświadczam, że mam ukończone 18 lat.</li>
+        </ul>
+
+        <div class="row">
+          <label>
+            <input type="checkbox" id="consentChk">
+            <span>Zgadzam się na udział w badaniu (wymagane)</span>
+          </label>
+        </div>
+
+        <div class="warn" id="warnBox">Zaznacz zgodę, aby rozpocząć badanie.</div>
+      </div>
+
+      <div class="row">
+        <button class="btn" id="startBtn" disabled>Start badania</button>
+      </div>
+
+      <div class="small">
+        Po udzieleniu zgody i wypełnieniu ramek przycisk "Start badania" podświetli się.</a>
+      </div>
+    </div>
+  </div>
+
+<script>
+  const chk = document.getElementById("consentChk");
+  const btn = document.getElementById("startBtn");
+  const warn = document.getElementById("warnBox");
+
+  // jeśli ktoś wrócił i miał już zgodę
+  const saved = sessionStorage.getItem("study_consent") === "yes";
+  if(saved){
+    chk.checked = true;
+    btn.disabled = false;
+  }
+
+  chk.addEventListener("change", () => {
+    btn.disabled = !chk.checked;
+    warn.style.display = "none";
+    if(chk.checked){
+      sessionStorage.setItem("study_consent", "yes");
+    }else{
+      sessionStorage.removeItem("study_consent");
+    }
+  });
+
+  btn.addEventListener("click", () => {
+    if(!chk.checked){
+      warn.style.display = "block";
+      return;
+    }
+    // idziemy do badania
+    window.location.href = "/study";
+  });
+</script>
+</body>
+</html>

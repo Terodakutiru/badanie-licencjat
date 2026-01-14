@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+.env
+secret.key
+wallet.json
+conversation.txt
+conversation_encrypted
+certificate*.png
+cert_*.png
+upload.csv
+token_upload.csv
+study_log.csv
+survey_responses.csv
+.idea/

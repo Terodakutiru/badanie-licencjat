@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ankieta</title>
+  <style>
+    body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:#0b1020;color:#e9ecf5;padding:26px}
+    .wrap{max-width:900px;margin:0 auto}
+    .card{border:1px solid rgba(255,255,255,.12);border-radius:16px;background:rgba(255,255,255,.03);padding:18px}
+    h1{margin:0 0 10px}
+    label{display:block;margin:14px 0 6px;color:#aab3d0}
+    select, textarea, input{
+      width:100%; padding:10px; border-radius:12px;
+      border:1px solid rgba(255,255,255,.12); background:rgba(0,0,0,.2); color:#e9ecf5
+    }
+    button{margin-top:14px;padding:12px 14px;border-radius:12px;border:0;
+      background:linear-gradient(135deg,#2ee59d,#00c2ff);color:#06101a;font-weight:900;cursor:pointer}
+    .muted{color:#aab3d0;font-size:12px;line-height:1.5}
+    .likert {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .likert label {
+      flex: 1;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .likert input {
+      display: none;
+    }
+
+    .dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      margin: 0 auto 6px;
+      opacity: 0.5;
+      border: 2px solid transparent;
+    }
+
+    .l1 { background: #ff4d4d; }
+    .l2 { background: #ff9f43; }
+    .l3 { background: #feca57; }
+    .l4 { background: #7bed9f; }
+    .l5 { background: #2ed573; }
+
+    .likert input:checked + .dot {
+      opacity: 1;
+      border-color: #fff;
+      box-shadow: 0 0 0 2px rgba(255,255,255,.25);
+    }
+
+    .scale-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #aab3d0;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="question">
+  <label>1) Ufam, że to narzędzie działa w sposób przewidywalny i rzetelny.</label>
+
+  <div class="likert">
+    <label>
+      <input type="radio" name="q1" value="1">
+      <div class="dot l1"></div>
+      1
+    </label>
+    <label>
+      <input type="radio" name="q1" value="2">
+      <div class="dot l2"></div>
+      2
+    </label>
+    <label>
+      <input type="radio" name="q1" value="3">
+      <div class="dot l3"></div>
+      3
+    </label>
+    <label>
+      <input type="radio" name="q1" value="4">
+      <div class="dot l4"></div>
+      4
+    </label>
+    <label>
+      <input type="radio" name="q1" value="5">
+      <div class="dot l5"></div>
+      5
+    </label>
+  </div>
+
+  <div class="scale-labels">
+    <span>Zdecydowanie się nie zgadzam</span>
+    <span>Zdecydowanie się zgadzam</span>
+  </div>
+</div>
+<div class="question">
+  <label>2) Ufam, że informacje generowane przez to narzędzie są wiarygodne.</label>
+
+  <div class="likert">
+    <label><input type="radio" name="q2" value="1"><div class="dot l1"></div>1</label>
+    <label><input type="radio" name="q2" value="2"><div class="dot l2"></div>2</label>
+    <label><input type="radio" name="q2" value="3"><div class="dot l3"></div>3</label>
+    <label><input type="radio" name="q2" value="4"><div class="dot l4"></div>4</label>
+    <label><input type="radio" name="q2" value="5"><div class="dot l5"></div>5</label>
+  </div>
+
+  <div class="scale-labels">
+    <span>Zdecydowanie się nie zgadzam</span>
+    <span>Zdecydowanie się zgadzam</span>
+  </div>
+</div>
+  <div class="question">
+  <label>3) Mam poczucie, że to narzędzie jest przygotowane w profesjonalny sposób.</label>
+
+  <div class="likert">
+    <label><input type="radio" name="q3" value="1"><div class="dot l1"></div>1</label>
+    <label><input type="radio" name="q3" value="2"><div class="dot l2"></div>2</label>
+    <label><input type="radio" name="q3" value="3"><div class="dot l3"></div>3</label>
+    <label><input type="radio" name="q3" value="4"><div class="dot l4"></div>4</label>
+    <label><input type="radio" name="q3" value="5"><div class="dot l5"></div>5</label>
+  </div>
+
+  <div class="scale-labels">
+    <span>Zdecydowanie się nie zgadzam</span>
+    <span>Zdecydowanie się zgadzam</span>
+  </div>
+</div>
+<div class="question">
+  <label>4) Mam poczucie, że dane użytkownika byłyby odpowiednio chronione podczas korzystania z tego narzędzia.</label>
+
+  <div class="likert">
+    <label><input type="radio" name="q4" value="1"><div class="dot l1"></div>1</label>
+    <label><input type="radio" name="q4" value="2"><div class="dot l2"></div>2</label>
+    <label><input type="radio" name="q4" value="3"><div class="dot l3"></div>3</label>
+    <label><input type="radio" name="q4" value="4"><div class="dot l4"></div>4</label>
+    <label><input type="radio" name="q4" value="5"><div class="dot l5"></div>5</label>
+  </div>
+
+  <div class="scale-labels">
+    <span>Zdecydowanie się nie zgadzam</span>
+    <span>Zdecydowanie się zgadzam</span>
+  </div>
+</div>
+  <div class="question">
+  <label>5) Ufam, że historia rozmowy byłaby przechowywana w bezpieczny sposób.</label>
+
+  <div class="likert">
+    <label><input type="radio" name="q5" value="1"><div class="dot l1"></div>1</label>
+    <label><input type="radio" name="q5" value="2"><div class="dot l2"></div>2</label>
+    <label><input type="radio" name="q5" value="3"><div class="dot l3"></div>3</label>
+    <label><input type="radio" name="q5" value="4"><div class="dot l4"></div>4</label>
+    <label><input type="radio" name="q5" value="5"><div class="dot l5"></div>5</label>
+  </div>
+
+  <div class="scale-labels">
+    <span>Zdecydowanie się nie zgadzam</span>
+    <span>Zdecydowanie się zgadzam</span>
+  </div>
+</div>
+  <div class="question">
+  <label>6) Chciał(a)bym korzystać z takiego narzędzia jako wsparcia pomiędzy sesjami terapeutycznymi.</label>
+
+  <div class="likert">
+    <label><input type="radio" name="q6" value="1"><div class="dot l1"></div>1</label>
+    <label><input type="radio" name="q6" value="2"><div class="dot l2"></div>2</label>
+    <label><input type="radio" name="q6" value="3"><div class="dot l3"></div>3</label>
+    <label><input type="radio" name="q6" value="4"><div class="dot l4"></div>4</label>
+    <label><input type="radio" name="q6" value="5"><div class="dot l5"></div>5</label>
+  </div>
+
+  <div class="scale-labels">
+    <span>Zdecydowanie się nie zgadzam</span>
+    <span>Zdecydowanie się zgadzam</span>
+  </div>
+</div>
+   <div class="question">
+  <label>7) Gdybym miał(a) możliwość, był(a)bym skłonny(a) korzystać z tego narzędzia ponownie.</label>
+
+  <div class="likert">
+    <label><input type="radio" name="q7" value="1"><div class="dot l1"></div>1</label>
+    <label><input type="radio" name="q7" value="2"><div class="dot l2"></div>2</label>
+    <label><input type="radio" name="q7" value="3"><div class="dot l3"></div>3</label>
+    <label><input type="radio" name="q7" value="4"><div class="dot l4"></div>4</label>
+    <label><input type="radio" name="q7" value="5"><div class="dot l5"></div>5</label>
+  </div>
+
+  <div class="scale-labels">
+    <span>Zdecydowanie się nie zgadzam</span>
+    <span>Zdecydowanie się zgadzam</span>
+  </div>
+</div>
+  <div class="question">
+  <label>8) Uważam, że sposób wykorzystania sztucznej inteligencji w tym narzędziu jest akceptowalny etycznie.</label>
+
+  <div class="likert">
+    <label><input type="radio" name="q8" value="1"><div class="dot l1"></div>1</label>
+    <label><input type="radio" name="q8" value="2"><div class="dot l2"></div>2</label>
+    <label><input type="radio" name="q8" value="3"><div class="dot l3"></div>3</label>
+    <label><input type="radio" name="q8" value="4"><div class="dot l4"></div>4</label>
+    <label><input type="radio" name="q8" value="5"><div class="dot l5"></div>5</label>
+  </div>
+
+  <div class="scale-labels">
+    <span>Zdecydowanie się nie zgadzam</span>
+    <span>Zdecydowanie się zgadzam</span>
+  </div>
+</div>
+    <div class="question">
+  <label>9) Czuł(a)bym się komfortowo, korzystając z takiego narzędzia w kontekście wsparcia psychologicznego.</label>
+
+  <div class="likert">
+    <label><input type="radio" name="q9" value="1"><div class="dot l1"></div>1</label>
+    <label><input type="radio" name="q9" value="2"><div class="dot l2"></div>2</label>
+    <label><input type="radio" name="q9" value="3"><div class="dot l3"></div>3</label>
+    <label><input type="radio" name="q9" value="4"><div class="dot l4"></div>4</label>
+    <label><input type="radio" name="q9" value="5"><div class="dot l5"></div>5</label>
+  </div>
+
+  <div class="scale-labels">
+    <span>Zdecydowanie się nie zgadzam</span>
+    <span>Zdecydowanie się zgadzam</span>
+  </div>
+</div>
+  <div class="question">
+  <label>10) Zwykle wolę dokładnie przemyśleć informacje, zanim wyrobię sobie opinię.</label>
+
+  <div class="likert">
+    <label><input type="radio" name="q10" value="1"><div class="dot l1"></div>1</label>
+    <label><input type="radio" name="q10" value="2"><div class="dot l2"></div>2</label>
+    <label><input type="radio" name="q10" value="3"><div class="dot l3"></div>3</label>
+    <label><input type="radio" name="q10" value="4"><div class="dot l4"></div>4</label>
+    <label><input type="radio" name="q10" value="5"><div class="dot l5"></div>5</label>
+  </div>
+
+  <div class="scale-labels">
+    <span>Zdecydowanie się nie zgadzam</span>
+    <span>Zdecydowanie się zgadzam</span>
+  </div>
+</div>
+  <div class="question">
+  <label>11) Lubię rozważać „za i przeciw” nawet w pozornie prostych sprawach.</label>
+
+  <div class="likert">
+    <label><input type="radio" name="q11" value="1"><div class="dot l1"></div>1</label>
+    <label><input type="radio" name="q11" value="2"><div class="dot l2"></div>2</label>
+    <label><input type="radio" name="q11" value="3"><div class="dot l3"></div>3</label>
+    <label><input type="radio" name="q11" value="4"><div class="dot l4"></div>4</label>
+    <label><input type="radio" name="q11" value="5"><div class="dot l5"></div>5</label>
+  </div>
+
+  <div class="scale-labels">
+    <span>Zdecydowanie się nie zgadzam</span>
+    <span>Zdecydowanie się zgadzam</span>
+  </div>
+</div>
+  <script>
+    function done(){
+      alert("Dzięki! (placeholder) — tu w wersji produkcyjnej będzie zapis odpowiedzi / przekierowanie.");
+      window.location.href = "/";
+    }
+  </script>
+</body>
+</html>

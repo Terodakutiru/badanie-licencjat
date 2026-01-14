@@ -1,0 +1,198 @@
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #e6ecf0;
+  margin: 0;
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+}
+
+#chat-container {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+#chat {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-bottom: 2rem;
+  min-height: 300px;
+}
+
+.bubble {
+  padding: 1rem;
+  border-radius: 18px;
+  max-width: 75%;
+  line-height: 1.4;
+  font-size: 1rem;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.user {
+  background-color: #d1e7dd;
+  align-self: flex-end;
+  text-align: right;
+}
+
+.ai {
+  background-color: #f8d7da;
+  align-self: flex-start;
+  text-align: left;
+}
+
+#typing {
+  font-style: italic;
+  color: #666;
+  display: none;
+}
+
+#cert {
+  background-color: #fefefe;
+  border-top: 1px solid #ccc;
+  padding-top: 1rem;
+  font-size: 0.9rem;
+}
+  .iconWrap{
+    width:64px;height:64px;border-radius:14px;
+    display:grid;place-items:center;
+    border:1px solid var(--line);
+    background:rgba(0,0,0,.14);
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,.03);
+    flex:0 0 auto;
+  }
+  .iconWrap svg{width:30px;height:30px;opacity:.95}
+
+  /* Podgląd certyfikatu */
+  .certPreview{
+    display:none;
+    margin-top:12px;
+    border:1px solid var(--line);
+    border-radius:14px;
+    overflow:hidden;
+    background:rgba(0,0,0,.12);
+  }
+  .certPreview img{
+    display:block;
+    width:100%;
+    height:auto;
+    max-height:220px;
+    object-fit:contain;
+    background:rgba(0,0,0,.22);
+  }
+  .certPreview .cap{
+    padding:10px 12px;
+    border-top:1px solid var(--line);
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.4;
+  }
+
+  /* Tekst “standards” pod modułem */
+  .certNote{
+    margin-top:10px;
+    padding:10px 12px;
+    border:1px solid var(--line);
+    border-radius:14px;
+    background:rgba(255,255,255,.03);
+    color:var(--muted);
+    font-size:12px;
+    line-height:1.55;
+  }
+  .certNote b{color:var(--text)}
+  .certNote ul{margin:8px 0 0 18px; padding:0}
+  .certNote li{margin:4px 0}
+
+  .certPreviewFrame{
+  width: 100%;
+  max-width: 560px;
+  margin-top: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(0,0,0,.12);
+  overflow: hidden;
+}
+
+
+.certPreviewImg{
+  display:block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+/* opcjonalnie: klik wygląda jak zoom */
+.certPreviewFrame button{
+  all: unset;
+  display:block;
+  cursor: zoom-in;
+  width:100%;
+}
+/* kontener miniatury */
+.certPreviewFrame{
+  width: 220px;
+  border-radius: 14px;
+  overflow: hidden;
+  background: transparent;          /* ❌ brak białego tła */
+  box-shadow: 0 10px 30px rgba(0,0,0,.45);
+  transition: transform .35s ease, box-shadow .35s ease;
+}
+
+/* hover = zoom */
+.certPreviewFrame:hover{
+  transform: scale(1.35);
+  z-index: 50;
+  box-shadow: 0 20px 60px rgba(0,0,0,.65);
+}
+
+/* obrazek */
+.certPreviewImg{
+  display:block;
+  width:100%;
+  height:auto;
+  object-fit:contain;
+  background: transparent;         /* ❌ brak białego tła */
+}
+
+/* kontener żeby hover nie był ucinany */
+.certPreviewWrap{
+  position: relative;
+  display: inline-block;
+  margin-top: 12px;
+}
+.certIcon{
+  width:72px;
+  height:72px;
+  border-radius:18px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background: radial-gradient(circle at top left,
+    rgba(124,92,255,.25),
+    rgba(0,0,0,.2)
+  );
+  border:1px solid rgba(255,255,255,.12);
+  box-shadow:
+    0 0 30px rgba(124,92,255,.25),
+    0 10px 25px rgba(0,0,0,.45);
+  flex:0 0 auto;
+  transition:.3s ease;
+}
+
+.certIcon svg{
+  width:52px;
+  height:52px;
+}
+
+.certIcon:hover{
+  transform: translateY(-2px) scale(1.05);
+  box-shadow:
+    0 0 45px rgba(124,92,255,.45),
+    0 12px 30px rgba(0,0,0,.6);
+}

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Weryfikacja certyfikatu</title>
+  <style>
+    body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial;background:#0b1020;color:#e9ecf5;padding:22px}
+    .wrap{max-width:900px;margin:0 auto}
+    .card{border:1px solid rgba(255,255,255,.12);border-radius:16px;background:rgba(255,255,255,.03);padding:16px}
+    h1{margin:0 0 8px}
+    .muted{color:#aab3d0;font-size:13px;line-height:1.5}
+    input{width:100%;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.12);background:rgba(0,0,0,.2);color:#e9ecf5}
+    button{border:0;border-radius:12px;padding:10px 12px;font-weight:800;cursor:pointer;margin-top:10px;background:linear-gradient(135deg,#2ee59d,#00c2ff);color:#06101a}
+    .out{margin-top:12px}
+    img{max-width:100%;border-radius:14px;border:1px solid rgba(255,255,255,.12)}
+    pre{white-space:pre-wrap;background:rgba(0,0,0,.2);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:12px}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="card">
+    <h1>Weryfikacja certyfikatu</h1>
+    <div class="muted">
+      Ta strona pozwala odszyfrować certyfikat (PNG) na podstawie CID w IPFS.<br>
+        <br>CID wypełnia się sam wystarczy kliknąć "Odszyfruj certyfikat"
+    </div>
+
+    <div style="margin-top:12px">
+      <div class="muted">CID certyfikatu (encrypted)</div>
+      <input id="certCid" value="{{ cert_cid }}" />
+      <button onclick="decryptCert()">Odszyfruj certyfikat</button>
+      <div class="out" id="certOut"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // podciągamy text cid z parametru ?text=
+  const params = new URLSearchParams(window.location.search);
+  const t = params.get("text");
+  if(t) document.getElementById("textCid").value = t;
+
+  async function decryptCert(){
+    const cid = document.getElementById("certCid").value.trim();
+    const res = await fetch("/decrypt", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ cid, type:"cert" })
+    });
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    document.getElementById("certOut").innerHTML = `<img src="${url}" alt="Odszyfrowany certyfikat">`;
+  }
+
+  async function decryptText(){
+    const cid = document.getElementById("textCid").value.trim();
+    const res = await fetch("/decrypt", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({ cid, type:"text" })
+    });
+    const data = await res.json();
+    document.getElementById("textOut").innerHTML = `<pre>${(data.text || data.error || "")}</pre>`;
+  }
+</script>
+</body>
+</html>
