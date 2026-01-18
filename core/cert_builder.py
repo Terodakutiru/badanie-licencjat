@@ -1,16 +1,21 @@
 from PIL import Image, ImageDraw, ImageFont
 from datetime import datetime
 import qrcode
+import os
 
+def _load_font(size: int, weight: str = "Regular"):
+    font_path = os.path.join("static", "fonts", f"Inter-{weight}.ttf")
+    if os.path.exists(font_path):
+        return ImageFont.truetype(font_path, size)
 
-def _load_font(size: int):
+    # fallback Windows (jak testujesz lokalnie)
     for path in ("arial.ttf", "C:/Windows/Fonts/arial.ttf"):
         try:
             return ImageFont.truetype(path, size)
         except Exception:
             pass
-    return ImageFont.load_default()
 
+    return ImageFont.load_default()
 
 def _rounded_rectangle(draw, xy, radius, fill, outline=None, width=1):
     try:
@@ -73,11 +78,11 @@ def build_cert_image(hash_hex: str, output_path: str = "certificate.png", previe
     _rounded_rectangle(draw, card, 24, fill=(18, 26, 51), outline=(255, 255, 255), width=2)
 
     # Fonts
-    title = _load_font(44)
-    h1 = _load_font(30)
-    body = _load_font(22)
-    mono = _load_font(20)
-    small = _load_font(18)
+    title = _load_font(52, "SemiBold")
+    h1 = _load_font(34, "SemiBold")
+    body = _load_font(24, "Regular")
+    mono = _load_font(24, "Regular")
+    small = _load_font(19, "Regular")
 
     # Header
     draw.text((card[0] + 46, card[1] + 40), "CERTYFIKAT ROZMOWY AI", font=title, fill=(233, 236, 245))
@@ -118,7 +123,7 @@ def build_cert_image(hash_hex: str, output_path: str = "certificate.png", previe
 
     # Hash box (minimalnie niższy, żeby zmieścić opis standardów)
     hash_y = section_y + 110
-    hash_box_h = 240  # było 270
+    hash_box_h = 260  # było 270
     _rounded_rectangle(draw, (card[0] + 40, hash_y, card[2] - 40, hash_y + hash_box_h), 18,
                        fill=(10, 16, 32), outline=(255, 255, 255), width=1)
 
@@ -127,13 +132,15 @@ def build_cert_image(hash_hex: str, output_path: str = "certificate.png", previe
         preview_hash = "xxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx\nxxxx xxxx xxxx xxxx xxxx xxxx xxxx xxxx"
         draw.text((card[0] + 70, hash_y + 50), preview_hash, font=mono, fill=(233, 236, 245))
     else:
-        groups = [hash_hex[i:i+8] for i in range(0, len(hash_hex), 8)]
-        line_len = 6  # 6 groups per line
-        x0, y0 = card[0] + 70, hash_y + 36
+        groups = [hash_hex[i:i + 8] for i in range(0, len(hash_hex), 8)]
+        line_len = 5  # było 6
+        x0, y0 = card[0] + 70, hash_y + 34
+        line_step = mono.size + 10
+
         for j in range(0, len(groups), line_len):
-            line = "  ".join(groups[j:j+line_len])
+            line = "  ".join(groups[j:j + line_len])
             draw.text((x0, y0), line, font=mono, fill=(233, 236, 245))
-            y0 += 36
+            y0 += line_step
 
     # QR with payload
     if preview:
@@ -172,24 +179,31 @@ def build_cert_image(hash_hex: str, output_path: str = "certificate.png", previe
     std_y += 44
 
     standards = [
-        "• Modele i procedury powinny być zweryfikowane oraz testowane przed wdrożeniem.",
-        "• Dane rozmowy są szyfrowane, a integralność zapisu potwierdzana przez hash (SHA-256).",
-        "• Dostęp do treści powinien mieć wyłącznie pacjent i terapeuta (kontrola uprawnień).",
-        "• Narzędzie powinno spełniać wymagania bezpieczeństwa danych i standardy etyczne.",
-        "• Model powinien być trenowany na wiarygodnych danych naukowych i przeglądany przez",
-        "  ekspertów z branży cyfrowej oraz psychologicznej.",
+        "Modele i procedury powinny być zweryfikowane oraz testowane przed wdrożeniem.",
+        "Dane rozmowy są szyfrowane, a integralność zapisu potwierdzana przez hash (SHA-256).",
+        "Zapis rozmowy jest powiązany z graficznym certyfikatem w celu kontroli integralności i autentyczności danych.",
+        "Dostęp do treści rozmowy powinien mieć wyłącznie pacjent i terapeuta (kontrola uprawnień).",
+        "Narzędzie powinno spełniać wymagania bezpieczeństwa danych i standardy etyczne.",
+        "Model powinien być trenowany na wiarygodnych danych naukowych oraz przeglądany przez ekspertów z branży cyfrowej i psychologicznej.",
+        "Architektura systemu powinna być warstwowa (frontend, backend, warstwa bezpieczeństwa i certyfikacji, warstwa przechowywania danych).",
+        "System powinien realizować zasady privacy by design oraz security by design.",
+        "Każda rozmowa powinna posiadać unikalny identyfikator sesji oraz znacznik czasu.",
+        "Certyfikat powinien umożliwiać weryfikację integralności i autentyczności zapisu rozmowy."
     ]
+   # Footer line
+    footer_y = card[3] - 120
+    max_std_y = footer_y - 20
 
     for line in standards:
-        # lekkie zawijanie, żeby nie wyjechało (gdybyś zmieniał tekst)
         wrapped = _wrap_text_lines(line, max_chars=88)
         for wline in wrapped:
+            if std_y >= max_std_y:
+                break
             draw.text((card[0] + 60, std_y), wline, font=small, fill=(170, 179, 208))
             std_y += 26
+        if std_y >= max_std_y:
+            break
         std_y += 4
-
-    # Footer line
-    footer_y = card[3] - 120
     draw.line((card[0] + 40, footer_y, card[2] - 40, footer_y), fill=(255, 255, 255), width=1)
     draw.text((card[0] + 46, card[3] - 92), "Wytwór badawczy: certyfikacja rozmów AI • Uniwersytet SWPS", font=body, fill=(170, 179, 208))
 

@@ -87,7 +87,7 @@
         <textarea id="openText" placeholder="Napisz krótko..."></textarea>
       </div>
 
-      <button onclick="submitSurvey()">Zakończ</button>
+      <button id="submitBtn" onclick="submitSurvey()">Zakończ</button>
       <div class="err" id="errBox"></div>
       <div class="ok" id="okBox">Dzięki! Odpowiedzi zapisane.</div>
     </div>
@@ -240,55 +240,84 @@
     return answers;
   }
 
-  async function submitSurvey(){
-    clearErr();
+ async function submitSurvey(){
+  clearErr();
 
-    const participant_id = pid;
-    const grp = group;
-    const answers = collectAnswers();
-    const open_text = (document.getElementById("openText").value || "").trim();
+  const btn = document.getElementById("submitBtn");
+  btn.disabled = true;
+  btn.style.opacity = "0.7";
+  btn.textContent = "Wysyłanie…";
 
-    if(!participant_id || !grp){
-      showErr("Brak participant_id lub group (sprawdź /finish → /survey?pid=...&group=...)");
+  const participant_id = pid;
+  const grp = group;
+  const answers = collectAnswers();
+  const open_text = (document.getElementById("openText").value || "").trim();
+
+  function unlockBtn(){
+    btn.disabled = false;
+    btn.style.opacity = "1";
+    btn.textContent = "Zakończ";
+  }
+
+  if(!participant_id || !grp){
+    showErr("Brak participant_id lub group (sprawdź /finish → /survey?pid=...&group=...)");
+    unlockBtn();
+    return;
+  }
+
+  // walidacja w UI
+  const required = ["q1","q2","q3","q4","q5","q6","q7","q8","q9","q10","mc1","mc2"];
+  for(const k of required){
+    if(!answers[k]){
+      showErr("Uzupełnij wszystkie pytania (brakuje: " + k + ").");
+      unlockBtn();
       return;
     }
+  }
 
-    // walidacja w UI (to samo i tak robisz w backendzie)
-    const required = ["q1","q2","q3","q4","q5","q6","q7","q8","q9","q10","mc1","mc2"];
-    for(const k of required){
-      if(!answers[k]){
-        showErr("Uzupełnij wszystkie pytania (brakuje: " + k + ").");
-        return;
-      }
-    }
+  const payload = {
+    ts: new Date().toISOString(),
+    participant_id,
+    group: grp,
+    answers,
+    order: window.__ORDER,
+    open_text
+  };
 
-    const payload = {
-      ts: new Date().toISOString(),
-      participant_id,
-      group: grp,
-      answers,
-      order: window.__ORDER,
-      open_text
-    };
-
-    const res = await fetch("/api/survey", {
+  let res, data = {};
+  try{
+    res = await fetch("/api/survey", {
       method: "POST",
       headers: {"Content-Type":"application/json"},
       body: JSON.stringify(payload)
     });
-
-window.location.href = `/debrief?pid=${encodeURIComponent(pid)}&group=${encodeURIComponent(grp)}`;
-
-const data = await res.json();
-    if(!res.ok || data.error){
-      showErr("Błąd zapisu: " + (data.error || res.status));
-      return;
-    }
-
-    document.getElementById("okBox").style.display = "block";
-    // możesz przekierować po 1–2 sek:
-    setTimeout(()=>{ window.location.href="/"; }, 800);
+  } catch(e){
+    showErr("Błąd sieci: nie udało się połączyć z serwerem.");
+    unlockBtn();
+    return;
   }
+
+  try { data = await res.json(); } catch(e) { data = {}; }
+
+  if (res.status === 409) {
+    // ✅ ankieta już wysłana / limit grupy
+    document.getElementById("okBox").style.display = "block";
+    document.getElementById("okBox").textContent =
+      "Dziękujemy! Ankieta została już wcześniej wypełniona albo ta grupa ma komplet odpowiedzi.";
+    // tu możesz przekierować albo zostawić na stronie:
+    // setTimeout(()=>{ window.location.href="/"; }, 1200);
+    return;
+  }
+
+  if (!res.ok || data.error) {
+    showErr("Błąd zapisu: " + (data.error || res.status));
+    unlockBtn();
+    return;
+  }
+
+  // ✅ sukces
+  window.location.href = `/debrief?pid=${encodeURIComponent(pid)}&group=${encodeURIComponent(grp)}`;
+}
 </script>
 </body>
 </html>
