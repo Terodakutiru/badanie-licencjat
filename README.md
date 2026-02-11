@@ -5,7 +5,7 @@ Celem jest zbadanie wpływu certyfikacji rozmów AI oraz autorytetu eksperckiego
 na poziom zaufania użytkowników.
 
 System:
-- symuluje rozmowę krokową z chatbotem
+- prezentuje rozmowę krokową z chatbotem
 - generuje certyfikat rozmowy (hash + szyfrowanie)
 - zapisuje dane badawcze do CSV
 - umożliwia weryfikację certyfikatu
