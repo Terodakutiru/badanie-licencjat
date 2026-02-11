@@ -13,3 +13,6 @@ token_upload.csv
 study_log.csv
 survey_responses.csv
 .idea/
+*.encrypted
+*.json
+.env
