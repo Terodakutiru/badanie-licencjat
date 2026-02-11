@@ -1,4 +1,4 @@
-# Badanie licencjackie — certyfikacja rozmów AI
+# Badanie licencjackie - Certyfikacja rozmów generatywnej sztucznej inteligencji w psychoterapii: wpływ na zaufanie użytkowników
 
 Projekt badawczy realizowany w ramach pracy licencjackiej (SWPS).
 Celem jest zbadanie wpływu certyfikacji rozmów AI oraz autorytetu eksperckiego
