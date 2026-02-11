@@ -15,3 +15,5 @@ Technologie:
 - HTML / CSS / JS
 - IPFS (Lighthouse)
 - szyfrowanie Fernet
+
+Repozytorium nie zawiera danych uczestników ani wygenerowanych w trakcie badania plików certyfikatów. Dane są przechowywane w sposób poufny.
