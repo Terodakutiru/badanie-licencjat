@@ -16,4 +16,7 @@ Technologie:
 - IPFS (Lighthouse)
 - szyfrowanie Fernet
 
+[Obrona licencjat (2).pdf](https://github.com/user-attachments/files/28220954/Obrona.licencjat.2.pdf)
+
+
 Repozytorium nie zawiera danych uczestników ani wygenerowanych w trakcie badania plików certyfikatów. Dane są przechowywane w sposób poufny.
